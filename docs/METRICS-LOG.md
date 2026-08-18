@@ -81,3 +81,21 @@
 | Stage 4 | 100% | Full promote, monitor 30+ min |
 | Total typical rollout | - | ~45 min - 1.5 hours (varies by team/risk tolerance) |
 Note: Actual live traffic-split timing not measured in this lab due to CoreDNS instability (documented above). This table reflects general industry practice for reference in interviews, not a claim of measured data.
+
+### /metrics Endpoint - Verified (12 Aug 2026)
+- order_service_requests_total{endpoint="/health"}: 72 (from k8s probes)
+- order_service_requests_total{endpoint="/"}: 2 (manual test)
+- Latency for "/": 0.129 ms (sum/count)
+- Bonus (free from prometheus_client): CPU time, memory (RSS 34MB), open FDs
+
+### Request Count Measurement - How It Works
+- App-level: prometheus_client Counter tracks cumulative count in memory, exposed at /metrics
+- Prometheus-level: scrapes /metrics every 15-30s, stores as time-series, calculates rate (req/sec), latency percentiles (p50/p95/p99) from raw counter+histogram data
+- This lab: verified counter mechanism works correctly (2 requests on "/" tracked accurately)
+
+### Industry Reference - Typical Request Volume (NOT this lab's data, general reference for interview)
+| Company Scale | Order-service-type endpoint - rough daily volume |
+|---|---|
+| Startup | 100 - 1,000 requests/day |
+| Mid-size company | 10,000 - 100,000 requests/day |
+| Large e-commerce | Millions/day, thousands/sec at peak |
